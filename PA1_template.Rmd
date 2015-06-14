@@ -17,7 +17,7 @@ As described in the exercise, this dataset has recorded **steps** in a 5-minute 
 I load the file, trasform the date into a date object and do some preliminary inspection:
 ```{r}
 activity = read.csv("activity.csv", header = T, stringsAsFactors = FALSE)
-activity$date = as.Date(activity$Date)
+activity$date = as.Date(activity$date)
 str(activity)
 head(activity)
 summary(activity)
@@ -26,9 +26,42 @@ summary(activity)
 
 ## What is mean total number of steps taken per day?
 
-
+First we calculate the total number of steps per day and store it in the variable **stepsByDate**. We will use the library *dplyr* examined in the 3rd course of the specialization.
+```{r message=FALSE}
+require(dplyr)
+stepsByDate = activity %>% 
+              group_by(date) %>% 
+              summarize(totalSteps = sum(steps, na.rm = TRUE)) %>% 
+              collect()
+```
+Then we use the package *ggplot* examined in the 4th course of the specialization to plot the histogram.
+We use a bindwidth of 1000 and colorize the bars by the number of measurements in each group of the histogram.
+The mean and median are calculated in the variable *meanSteps* and *medianSteps* accordingly and are shown on the graph and the graph legend
+```{r message=FALSE}
+require(ggplot2)
+meanSteps = round(mean(stepsByDate$totalSteps))
+medianSteps = median(stepsByDate$totalSteps)
+ggplot(stepsByDate) + 
+        geom_histogram(binwidth = 1100, aes(x = totalSteps, fill = ..count..)) + 
+        labs(x = "Total Steps taken") + 
+        ggtitle("Total number of steps taken per day") + 
+        geom_vline(aes(xintercept = meanSteps, colour = "red"), size = 2, linetype = "longdash") + 
+        geom_vline(aes(xintercept = medianSteps, colour = "green"), size = 2, linetype = "longdash", show_guide = TRUE) + 
+        scale_colour_manual(name = "Steps", values = c('red' = 'red', 'green' = 'green'), labels = c(paste("Mean:", meanSteps), paste("Median:", medianSteps)), guide = 'legend')
+```
 
 ## What is the average daily activity pattern?
+
+Then we average the steps by interval and plot them.
+Also, we find the interval with the maximum steps and indicate it.
+
+```{r message=FALSE}
+stepsByInterval = activity %>% 
+              group_by(interval) %>% 
+              summarize(meanSteps = mean(steps, na.rm = TRUE)) %>% 
+              collect()
+```
+
 
 
 
