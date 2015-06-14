@@ -193,3 +193,40 @@ ggplot(stepsByDate) +
 The mean value increased and so did the median. This is reasonable since we replaced the missing values by the mean value for that interval. It also makes sense that the mean would be closer to the mean since we have more observations equal to the mean.
 
 ## Are there differences in activity patterns between weekdays and weekends?
+
+In this exercise we are going to show if there are differences in activity patterns between weekdays and weekends.
+First we add a new factor column named *DayType* in our filled-in activity variable (**newSteps**) with 2 levels **weekday** and **weekend**.
+
+```r
+newSteps$date = as.Date(newSteps$date)
+newSteps = newSteps %>% 
+        mutate(DayType = ifelse(weekdays(date) == "Saturday" | 
+                                        weekdays(date) == "Sunday", "weekend", "weekday")) 
+newSteps$DayType = factor(newSteps$DayType, levels = c("weekend", "weekday"))
+```
+
+Now we will make a different time series plot for weekends and weekdays similar to the one shown in the README file.
+
+```r
+newStepsByIntervalAndDayType = newSteps %>% 
+              group_by(interval, DayType) %>% 
+              summarize(meanSteps = mean(steps)) %>% 
+              collect()
+# Now find the interval in which the maximum average number of steps 
+# occur and the maximum number of average steps
+maxRow = which.max(stepsByInterval$meanSteps)
+maxInterval = as.numeric(stepsByInterval[maxRow, "interval"])
+maxSteps = as.numeric(stepsByInterval[maxRow, "meanSteps"])
+# Then plot it
+ggplot(newStepsByIntervalAndDayType, aes(x = interval, y = meanSteps)) + 
+        geom_line() + 
+        labs(x = "Interval", y = "Mean Steps") + 
+        ggtitle("Activity weekdays vs weekends") + 
+        labs(x = "Interval", y = "Number of Steps") +
+        facet_wrap(~DayType, nrow = 2)
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+
+We can observe that the activity is spread more throughout the day during weekends while during weekdays there is a "rush hour".
+
