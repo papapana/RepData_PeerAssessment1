@@ -8,6 +8,20 @@ output:
 
 ## Loading and preprocessing the data
 
+First I will clean any remaining variable in the environment:
+```{r}
+rm(list = ls(all.names = TRUE))
+```
+Then if the **activity.csv** file is not present in the current directory, one has to download it from [Activity Dataset for Assignment 1](https://d396qusza40orc.cloudfront.net/repdata%2Fdata%2Factivity.zip) and place it in the current directory.
+As described in the exercise, this dataset has recorded **steps** in a 5-minute **interval** for a specified **date**.
+I load the file, trasform the date into a date object and do some preliminary inspection:
+```{r}
+activity = read.csv("activity.csv", header = T, stringsAsFactors = FALSE)
+activity$date = as.Date(activity$Date)
+str(activity)
+head(activity)
+summary(activity)
+```
 
 
 ## What is mean total number of steps taken per day?
