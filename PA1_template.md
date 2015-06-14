@@ -79,19 +79,117 @@ ggplot(stepsByDate) +
         labs(x = "Total Steps taken") + 
         ggtitle("Total number of steps taken per day") + 
         geom_vline(aes(xintercept = meanSteps, colour = "red"), size = 2, linetype = "longdash") + 
-        geom_vline(aes(xintercept = medianSteps, colour = "green"), size = 2, linetype = "longdash", show_guide = TRUE) + 
-        scale_colour_manual(name = "Steps", values = c('red' = 'red', 'green' = 'green'), labels = c(paste("Mean:", meanSteps), paste("Median:", medianSteps)), guide = 'legend')
+        geom_vline(aes(xintercept = medianSteps, colour = "green"), size = 2, linetype = "longdash", 
+                   show_guide = TRUE) + 
+        scale_colour_manual(name = "Steps", values = c('red' = 'red', 'green' = 'green'), 
+                            labels = c(paste("Mean:", meanSteps), paste("Median:", medianSteps)), 
+                            guide = 'legend')
 ```
 
 ![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
 
 ## What is the average daily activity pattern?
 
+Then we average the steps by interval and plot them.
+Also, we find the interval with the maximum steps and indicate it.
 
 
+```r
+stepsByInterval = activity %>% 
+              group_by(interval) %>% 
+              summarize(meanSteps = mean(steps, na.rm = TRUE)) %>% 
+              collect()
+# Now find the interval in which the maximum average number of steps 
+# occur and the maximum number of average steps
+maxRow = which.max(stepsByInterval$meanSteps)
+maxInterval = as.numeric(stepsByInterval[maxRow, "interval"])
+maxSteps = as.numeric(stepsByInterval[maxRow, "meanSteps"])
+# Then plot it
+ggplot(stepsByInterval, aes(x = interval, y = meanSteps)) + 
+        geom_line() + 
+        labs(x = "Interval", y = "Mean Steps") + 
+        ggtitle("Average Daily Activity Pattern") + 
+        geom_point(x = maxInterval, y = maxSteps, size = 4, colour = "red") + 
+        annotate("text", x = maxInterval + 620, y = maxSteps - 5, 
+                 label = paste0("Maximum average steps: ", round(maxSteps, 1), 
+                                "\nOn interval: ", maxInterval), 
+                 colour = "red") 
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
 
 ## Imputing missing values
 
+In this exercise we are asked to imput the missing values indicated encoded by R as *NA*.
 
+1. First we calculate and report the total number of missing values in the dataset
+
+```r
+numMissing = sum(is.na(activity$steps))
+numMissing
+```
+
+```
+## [1] 2304
+```
+2. Now we will fill the missing values of the intervals with the mean of the interval
+3. And store it in a variable called newSteps. We verify that there is no **NA** value left.
+
+```r
+newSteps = activity %>% 
+        group_by(interval) %>% 
+        mutate(meanSteps = mean(steps, na.rm = TRUE), steps = ifelse(is.na(steps), meanSteps, steps)) %>% 
+        select(steps, date, interval) %>% 
+        collect()
+head(newSteps)
+```
+
+```
+## Source: local data frame [6 x 3]
+## Groups: interval
+## 
+##       steps       date interval
+## 1 1.7169811 2012-10-01        0
+## 2 0.3396226 2012-10-01        5
+## 3 0.1320755 2012-10-01       10
+## 4 0.1509434 2012-10-01       15
+## 5 0.0754717 2012-10-01       20
+## 6 2.0943396 2012-10-01       25
+```
+
+```r
+sum(is.na(newSteps))
+```
+
+```
+## [1] 0
+```
+
+4. We repeat the histogram creating procedure of question **2** and discuss the differences
+
+
+```r
+require(ggplot2)
+newStepsByDate = newSteps %>% 
+              group_by(date) %>% 
+              summarize(totalSteps = sum(steps)) %>% 
+              collect()
+meanSteps = round(mean(newStepsByDate$totalSteps))
+medianSteps = round(median(newStepsByDate$totalSteps), 1)
+ggplot(stepsByDate) + 
+        geom_histogram(binwidth = 1100, aes(x = totalSteps, fill = ..count..)) + 
+        labs(x = "Total Steps taken") + 
+        ggtitle("Total number of steps taken per day after imputting") + 
+        geom_vline(aes(xintercept = meanSteps, colour = "red"), size = 2) + 
+        geom_vline(aes(xintercept = medianSteps, colour = "green"), size = 2, linetype = "longdash", 
+                   show_guide = TRUE) + 
+        scale_colour_manual(name = "Steps", values = c('red' = 'red', 'green' = 'green'), 
+                            labels = c(paste("Mean:", meanSteps), paste("Median:", medianSteps)), 
+                            guide = 'legend')
+```
+
+![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+
+The mean value increased and so did the median. This is reasonable since we replaced the missing values by the mean value for that interval. It also makes sense that the mean would be closer to the mean since we have more observations equal to the mean.
 
 ## Are there differences in activity patterns between weekdays and weekends?
