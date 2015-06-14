@@ -1,6 +1,7 @@
 # Reproducible Research: Peer Assessment 1
 
 
+
 ## Loading and preprocessing the data
 
 First I will clean any remaining variable in the environment:
@@ -86,7 +87,7 @@ ggplot(stepsByDate) +
                             guide = 'legend')
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-4-1.png) 
+![](figure/unnamed-chunk-4-1.png) 
 
 ## What is the average daily activity pattern?
 
@@ -116,7 +117,7 @@ ggplot(stepsByInterval, aes(x = interval, y = meanSteps)) +
                  colour = "red") 
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-5-1.png) 
+![](figure/unnamed-chunk-5-1.png) 
 
 ## Imputing missing values
 
@@ -188,7 +189,7 @@ ggplot(stepsByDate) +
                             guide = 'legend')
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-8-1.png) 
+![](figure/unnamed-chunk-8-1.png) 
 
 The mean value increased and so did the median. This is reasonable since we replaced the missing values by the mean value for that interval. It also makes sense that the mean would be closer to the mean since we have more observations equal to the mean.
 
@@ -226,7 +227,7 @@ ggplot(newStepsByIntervalAndDayType, aes(x = interval, y = meanSteps)) +
         facet_wrap(~DayType, nrow = 2)
 ```
 
-![](PA1_template_files/figure-html/unnamed-chunk-10-1.png) 
+![](figure/unnamed-chunk-10-1.png) 
 
 We can observe that the activity is spread more throughout the day during weekends while during weekdays there is a "rush hour".
 
